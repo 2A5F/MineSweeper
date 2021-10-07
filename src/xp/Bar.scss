@@ -1,0 +1,79 @@
+@import "./xp.scss";
+
+.xp.board > .bar {
+  margin-bottom: 6px;
+  padding: 4px 5px;
+
+  @include xp-border(2px);
+
+  > .face {
+    width: 20px;
+    height: 20px;
+    @include xp-border-rev(2px);
+    outline: 1px solid var(--cell-line);
+    background-position: center center;
+    background-size: 20px 20px;
+    box-sizing: content-box;
+    background-image: url(./img/face_normal.png);
+
+    &.click {
+      background-image: url(./img/face_click.png);
+    }
+    &.died {
+      background-image: url(./img/face_cry.png);
+    }
+    &.win {
+      background-image: url(./img/face_sunglasses.png);
+    }
+  }
+
+  > .num {
+    min-width: 13px;
+    height: 23px;
+    background: #000000;
+    box-sizing: content-box;
+    @include xp-border(1px);
+
+    > .num-item {
+      width: 13px;
+      height: 23px;
+      background-image: url("./img/number_base.png");
+
+      > .n {
+        width: 13px;
+        height: 23px;
+
+        &.n-0 {
+          background-image: url("./img/number_0.png");
+        }
+        &.n-1 {
+          background-image: url("./img/number_1.png");
+        }
+        &.n-2 {
+          background-image: url("./img/number_2.png");
+        }
+        &.n-3 {
+          background-image: url("./img/number_3.png");
+        }
+        &.n-4 {
+          background-image: url("./img/number_4.png");
+        }
+        &.n-5 {
+          background-image: url("./img/number_5.png");
+        }
+        &.n-6 {
+          background-image: url("./img/number_6.png");
+        }
+        &.n-7 {
+          background-image: url("./img/number_7.png");
+        }
+        &.n-8 {
+          background-image: url("./img/number_8.png");
+        }
+        &.n-9 {
+          background-image: url("./img/number_9.png");
+        }
+      }
+    }
+  }
+}

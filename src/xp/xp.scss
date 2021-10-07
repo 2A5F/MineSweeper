@@ -1,0 +1,42 @@
+.xp {
+  --bg: #c0c0c0;
+  --board-bg: var(--bg);
+  --cell-bg: var(--bg);
+  --border-top: #808080;
+  --border-left: #808080;
+  --border-right: #ffffff;
+  --border-bottom: #ffffff;
+  --cell-size: 16px;
+  --cell-line: #808080;
+}
+
+@mixin xp-border($size) {
+  border: $size solid;
+  border-top-color: var(--border-top);
+  border-left-color: var(--border-left);
+  border-right-color: var(--border-right);
+  border-bottom-color: var(--border-bottom);
+}
+@mixin xp-border-rev($size) {
+  border: $size solid;
+  border-top-color: var(--border-bottom);
+  border-left-color: var(--border-right);
+  border-right-color: var(--border-left);
+  border-bottom-color: var(--border-top);
+}
+
+.xp {
+  &.board {
+    min-width: 100px;
+    min-height: 100px;
+    background-color: var(--board-bg);
+    @include xp-border-rev(3px);
+    padding: 6px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+    image-rendering: pixelated;
+
+    > .grid {
+      @include xp-border(3px);
+    }
+  }
+}

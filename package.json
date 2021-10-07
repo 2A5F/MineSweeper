@@ -1,0 +1,32 @@
+{
+  "name": "minesweeper",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
+    "@material-ui/core": "^5.0.0-beta.5",
+    "ahooks": "^2.10.11",
+    "libsugar": "^2.8.5",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@vitejs/plugin-react": "^1.0.0",
+    "less": "^4.1.2",
+    "sass": "^1.42.1",
+    "stylus": "^0.55.0",
+    "typescript": "^4.3.2",
+    "vite": "^2.6.0",
+    "vite-plugin-pwa": "^0.11.3",
+    "vite-plugin-ts-nameof": "^1.0.2",
+    "vite-plugin-windicss": "^1.4.9",
+    "windicss": "^3.1.9"
+  }
+}

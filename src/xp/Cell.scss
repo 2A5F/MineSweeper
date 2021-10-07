@@ -1,0 +1,45 @@
+@import "./xp.scss";
+
+.xp.board > .grid > .cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background-color: var(--cell-bg);
+  border-left: 1px solid var(--cell-line);
+  border-top: 1px solid var(--cell-line);
+  background-position: center center;
+  background-size: 16px 16px;
+
+  &:not(.open) {
+    @include xp-border-rev(2px);
+  }
+
+  &.open {
+    &.bomb {
+      background-image: url(./img/bomb.png);
+    }
+    &.n-1 {
+      background-image: url(./img/1.png);
+    }
+    &.n-2 {
+      background-image: url(./img/2.png);
+    }
+    &.n-3 {
+      background-image: url(./img/3.png);
+    }
+    &.n-4 {
+      background-image: url(./img/4.png);
+    }
+    &.n-5 {
+      background-image: url(./img/5.png);
+    }
+    &.n-6 {
+      background-image: url(./img/6.png);
+    }
+    &.n-7 {
+      background-image: url(./img/7.png);
+    }
+    &.n-8 {
+      background-image: url(./img/8.png);
+    }
+  }
+}
