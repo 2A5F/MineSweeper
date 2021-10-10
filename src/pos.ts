@@ -1,4 +1,5 @@
 import { Maybe } from "libsugar"
+import { Direction } from "./direction"
 import { Size } from "./size"
 
 export class Pos {
@@ -65,8 +66,20 @@ export class Pos {
         Maybe.then(this.downLeft(size), f)
         Maybe.then(this.downRight(size), f)
     }
+
+    forRoundWithDire(size: Size, filter: (dir: Direction) => boolean, f: (p: Pos, dir: Direction) => void) {
+        if (filter('up')) Maybe.then(this.up(size), a => f(a, 'up'))
+        if (filter('down')) Maybe.then(this.down(size), a => f(a, 'down'))
+        if (filter('left')) Maybe.then(this.left(size), a => f(a, 'left'))
+        if (filter('right')) Maybe.then(this.right(size), a => f(a, 'right'))
+        if (filter('upLeft')) Maybe.then(this.upLeft(size), a => f(a, 'upLeft'))
+        if (filter('upRight')) Maybe.then(this.upRight(size), a => f(a, 'upRight'))
+        if (filter('downLeft')) Maybe.then(this.downLeft(size), a => f(a, 'downLeft'))
+        if (filter('downRight')) Maybe.then(this.downRight(size), a => f(a, 'downRight'))
+    }
 }
 
 export function posOf(x: number, y: number) {
     return new Pos(x, y)
 }
+

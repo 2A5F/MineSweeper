@@ -13,6 +13,10 @@
     @include xp-border-rev(2px);
   }
 
+  &.flag {
+    background-image: url(./img/flag.png);
+  }
+
   &.open {
     &.bomb {
       background-image: url(./img/bomb.png);

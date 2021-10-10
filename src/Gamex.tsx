@@ -1,9 +1,31 @@
-import { range, rangeEq, rangeTo, rangeToEq, seq, used } from 'libsugar'
-import { createContext, useContext } from 'react'
-import { Pos, posOf } from './pos'
-import { Randge } from './randge'
-import { Size, sizeOf } from './size'
-import { inRange } from './utils'
+import { range, rangeEq, rangeTo, seq, used } from 'libsugar';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { Direction } from './direction';
+import { posOf, Pos } from './pos';
+import { Randge } from './randge';
+import { Size, sizeOf } from './size';
+import { inRange } from './utils';
+import { Board as XpBoard } from './xp'
+
+export default function Game({ theme }: { theme: 'xp' }) {
+    const game = useGame()
+
+    const ThemeBoard = useMemo(() => {
+        switch (theme) {
+            case 'xp':
+            default: return XpBoard
+        }
+    }, [theme])
+
+    return <div className={`game grid place-self-center`}>
+        <ThemeBoard size={game.size} grid={game.grid}
+            onRestart={() => game.restart()}
+            onOpen={msg => game.send(msg)}
+            onFlag={msg => game.send(msg)}
+        />
+    </div>
+}
+
 
 export class GameState {
     private randge: Randge = null!
@@ -48,16 +70,21 @@ export class GameState {
 
     send(msg: GameMsg) {
         if (msg.type === 'open') {
-            if (this.playing) { }
+            if (this.playing) {
+                this.openCell(msg.pos, msg.cell)
+            }
             else {
                 this.start(msg.pos, msg.cell)
             }
+        } else if (msg.type === 'flag') {
+            this.setFlag(msg.cell)
         }
     }
 
     private start(pos: Pos, root: GameCell) {
         this._playing = true
         this.genBombs(pos)
+        this.openSpace(pos, root)
         this.update()
     }
 
@@ -80,8 +107,43 @@ export class GameState {
         }
     }
 
-    private openSpace(pos: Pos) {
+    private async openSpace(pos: Pos, root: GameCell) {
+        if (root.hasFlag) return
+        if (root.hasBomb) return //todo
+        root.open = true
+        let cells = new Map<Pos, Direction | null>([[pos, null]])
+        let next = new Map<Pos, Direction | null>()
+        do {
+            for (const [p, dire] of cells) {
+                p.forRoundWithDire(this.size, d => !Direction.same(d, dire), (p, dir) => {
+                    const cell = this.grid[p.index(this.size)]
+                    if (cell.open || cell.hasFlag) return
+                    cell.open = true
+                    if (cell.num == 0 && !cell.hasBomb) {
+                        next.set(p, Direction.rev(dir))
+                    }
+                })
+            }
+            cells.clear();
+            [cells, next] = [next, cells]
+            // this.update()
+            // await delay(16)
+        } while (cells.size)
+    }
 
+    private async openCell(pos: Pos, root: GameCell) {
+        if (root.open) return
+        if (root.hasFlag) return
+        if (root.hasBomb) return //todo
+        if (root.num == 0) return this.openSpace(pos, root)
+        root.open = true
+        this.update()
+    }
+
+    private setFlag(root: GameCell) {
+        if (root.open) return
+        root.hasFlag = !root.hasFlag
+        this.update()
     }
 }
 
@@ -93,9 +155,13 @@ export function useGame() {
 export class GameCell {
     constructor(public pos: Pos) { }
     hasBomb = false
-    open = true
+    hasFlag = false
+    open = false
     num = 0
 }
 
 export type GameMsg =
     | { type: 'open', pos: Pos, cell: GameCell }
+    | { type: 'flag', cell: GameCell }
+
+export type GameMsgOf<M extends GameMsg['type']> = Extract<GameMsg, { type: M }>
