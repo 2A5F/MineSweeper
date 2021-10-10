@@ -18,7 +18,7 @@ export default function Game({ theme }: { theme: 'xp' }) {
     }, [theme])
 
     return <div className={`game grid place-self-center`}>
-        <ThemeBoard size={game.size} grid={game.grid}
+        <ThemeBoard size={game.size} grid={game.grid} won={game.won} dead={game.dead} last={game.last} startTime={game.startTime} endTime={game.endTime}
             onRestart={() => game.restart()}
             onMsg={msg => game.send(msg)}
         />
@@ -30,24 +30,58 @@ export class GameState {
     private _lock = false
     private randge: Randge = null!
     private _playing = false
-    public get playing() {
+    get playing() {
         return this._playing
     }
+    private _end = false
+    get end() {
+        return this._end
+    }
+    private _dead = false
+    get dead() {
+        return this._dead
+    }
+    private _won = false
+    get won() {
+        return this._won
+    }
     private _size: Size = sizeOf(9, 9)
-    public get size(): Size {
+    get size(): Size {
         return this._size
     }
-    private _bombs = 9
-    public get bombs() {
+    private _bombs = 10
+    get bombs() {
         return this._bombs
     }
+    private _last = this._bombs
+    get last() {
+        return this._last
+    }
     private _grid: GameCell[] = []
-    public get grid(): GameCell[] {
+    get grid(): GameCell[] {
         return this._grid
     }
     private _firstSafe = 1
-    public get firstSafe() {
+    get firstSafe() {
         return this._firstSafe
+    }
+
+    private _flags = new Set<GameCell>()
+    get flags() {
+        return this._flags.size
+    }
+    private _opening = 0
+    get opening() {
+        return this._opening
+    }
+
+    private _startTime: Date | null = null
+    get startTime() {
+        return this._startTime
+    }
+    private _endTime: Date | null = null
+    get endTime() {
+        return this._endTime
     }
 
     constructor(public update: () => void) {
@@ -62,13 +96,22 @@ export class GameState {
     restart(size: Size = this.size, bombs = this.bombs, firstSafe = this.firstSafe) {
         this._size = size
         this._bombs = bombs
+        this._last = bombs
+        this._opening = 0
+        this._flags.clear()
         this._firstSafe = firstSafe
         this._playing = false
+        this._end = false
+        this._won = false
+        this._dead = false
+        this._startTime = null
+        this._endTime = null
         this.init()
         this.update()
     }
 
     async send(msg: GameMsg) {
+        if (this.end) return
         if (this._lock) return
         this._lock = true
         switch (msg.type) {
@@ -98,6 +141,7 @@ export class GameState {
 
     private async start(pos: Pos, root: GameCell) {
         this._playing = true
+        this._startTime = new Date
         this.genBombs(pos)
         await this.openSpace(pos, root)
         this.update()
@@ -124,34 +168,50 @@ export class GameState {
 
     private async openSpace(pos: Pos, root: GameCell) {
         if (root.hasFlag) return
-        if (root.hasBomb) return //todo
-        root.open = true
+        if (root.hasBomb) return this.die(root)
+        if (!root.open) {
+            root.open = true
+            this._opening++
+        }
         let cells = new Map<Pos, Direction | null>([[pos, null]])
         let next = new Map<Pos, Direction | null>()
-        do {
-            for (const [p, dire] of cells) {
-                p.forRoundWithDire(this.size, d => !Direction.same(d, dire), (p, dir) => {
-                    const cell = this.grid[p.index(this.size)]
-                    if (cell.open || cell.hasFlag) return
-                    cell.open = true
-                    if (cell.num == 0 && !cell.hasBomb) {
-                        next.set(p, Direction.rev(dir))
-                    }
-                })
+        try {
+            do {
+                for (const [p, dire] of cells) {
+                    p.forRoundWithDire(this.size, d => !Direction.same(d, dire), (p, dir) => {
+                        const cell = this.grid[p.index(this.size)]
+                        if (cell.open || cell.hasFlag) return
+                        if (cell.hasBomb) throw (this.die(cell), GameState)
+                        if (!cell.open) {
+                            cell.open = true
+                            this._opening++
+                        }
+                        if (cell.num == 0 && !cell.hasBomb) {
+                            next.set(p, Direction.rev(dir))
+                        }
+                    })
+                }
+                cells.clear();
+                [cells, next] = [next, cells]
+                // this.update()
+                // await delay(16)
+            } while (cells.size)
+        } catch (e) {
+            if (e === GameState) {
+                return
             }
-            cells.clear();
-            [cells, next] = [next, cells]
-            // this.update()
-            // await delay(16)
-        } while (cells.size)
+        }
+        if (this.checkWin()) return
     }
 
     private async openCell(pos: Pos, root: GameCell) {
         if (root.open) return
         if (root.hasFlag) return
-        if (root.hasBomb) return //todo
+        if (root.hasBomb) return this.die(root)
         if (root.num == 0) return await this.openSpace(pos, root)
         root.open = true
+        this._opening++
+        if (this.checkWin()) return
         this.update()
     }
 
@@ -168,7 +228,15 @@ export class GameState {
 
     private setFlag(root: GameCell) {
         if (root.open) return
-        root.hasFlag = !root.hasFlag
+        if (root.hasFlag) {
+            root.hasFlag = false
+            this._last++
+            this._flags.delete(root)
+        } else {
+            root.hasFlag = true
+            this._last--
+            this._flags.add(root)
+        }
         this.update()
     }
 
@@ -199,6 +267,34 @@ export class GameState {
             this.update()
         }
     }
+
+    private die(cell: GameCell) {
+        this._endTime = new Date
+        cell.boom = true
+        this._end = true
+        this._dead = true
+        this.clearPreview()
+        this.update()
+    }
+
+    private checkWin() {
+        console.log('checkWin', this.last, this.flags, this.bombs, this.size.size, this.opening, this.size.size - this.opening,
+            this.size.size - this.opening === this.bombs || this.flags === this.bombs && seq(this._flags).all(cell => cell.hasBomb))
+        if (this.size.size - this.opening === this.bombs || this.flags === this.bombs && seq(this._flags).all(cell => cell.hasBomb)) {
+            this.win()
+            return true
+        }
+        else return false
+    }
+
+    private win() {
+        this._endTime = new Date
+        this._last = 0
+        this._end = true
+        this._won = true
+        this.clearPreview()
+        this.update()
+    }
 }
 
 export const GameStateContext = createContext<GameState>(null!)
@@ -212,7 +308,7 @@ export class GameCell {
     hasFlag = false
     open = false
     preview = false
-    err = false
+    boom = false
     num = 0
 }
 

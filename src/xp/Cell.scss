@@ -11,15 +11,22 @@
 
   &:not(.open) {
     @include xp.xp-border-rev(2px);
-  }
 
-  &.flag {
-    background-image: url(./img/flag.png);
+    &.flag {
+      background-image: url(./img/flag.png);
+    }
   }
 
   &.open {
     &.bomb {
       background-image: url(./img/bomb.png);
+
+      &.boom {
+        background-color: rgb(255, 0, 0);
+      }
+    }
+    &.flag:not(.bomb) {
+      background-image: url(./img/err.png);
     }
     @for $i from 1 through 8 {
       &.n-#{$i} {

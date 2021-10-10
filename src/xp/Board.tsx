@@ -6,8 +6,9 @@ import { rangeTo, rangeToEq, seq } from 'libsugar'
 import { useState } from 'react'
 import { useEventListener, useMount, useUpdate } from 'ahooks'
 import { GameCell } from '../Game'
+import { clazs } from '../utils'
 
-export default function Board({ size, grid, onRestart, onMsg }: BoardProps) {
+export default function Board({ size, grid, onRestart, onMsg, won, dead, last, startTime, endTime }: BoardProps) {
     const [first, setFirst] = useState(true)
     useMount(() => setFirst(false))
 
@@ -66,16 +67,17 @@ export default function Board({ size, grid, onRestart, onMsg }: BoardProps) {
         }
     })
 
-    const face = data.buttons != 0 ? 'click' : 'normal'
+    const face: Face = won ? 'won' : dead ? 'dead' : data.buttons != 0 ? 'click' : 'normal'
 
-    return <div className={`board flex flex-col xp`}>
+    return <div className={`board flex flex-col xp${clazs({ won, dead })}`}>
         {first ? <div className='preload'>
+            {seq(rangeTo(3)).map(i => <div className={`b${i + 1}`} key={`b${i + 1}`}></div>)}
             {seq(rangeTo(4)).map(i => <div className={`f${i + 1}`} key={`f${i + 1}`}></div>)}
             {seq(rangeTo(8)).map(i => <div className={`c${i + 1}`} key={`c${i + 1}`}></div>)}
             {seq(rangeToEq(9)).map(i => <div className={`n${i}`} key={`n${i}`}></div>)}
         </div> : null}
 
-        <Bar onRestart={onRestart} face={face} />
+        <Bar onRestart={onRestart} face={face} last={last} startTime={startTime} endTime={endTime} />
         <div className="grid" style={{ gridTemplateColumns: `repeat(${size.width}, 1fr)`, gridTemplateRows: `repeat(${size.height}, 1fr)` }}
             onMouseDown={e => {
                 data.cell = data.dom2cell.get(e.target as HTMLElement) ?? null
@@ -85,7 +87,7 @@ export default function Board({ size, grid, onRestart, onMsg }: BoardProps) {
                 if (dom == null) return
                 data.cell2dom.set(i, dom)
                 data.dom2cell.set(dom, i)
-            }} key={i.pos.str} cell={i} />)}
+            }} key={i.pos.str} cell={i} won={won} dead={dead} />)}
         </div>
     </div>
 }

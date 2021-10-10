@@ -6,4 +6,9 @@ export interface BoardProps {
     grid: GameCell[]
     onRestart: () => void
     onMsg: (msg: GameMsg) => void
+    won: boolean
+    dead: boolean
+    last: number
+    startTime: Date | null
+    endTime: Date | null
 }

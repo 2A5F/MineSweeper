@@ -15,6 +15,15 @@
     }
 
     > .preload {
+      > .b1 {
+        background-image: url("./img/bomb.png");
+      }
+      > .b2 {
+        background-image: url("./img/err.png");
+      }
+      > .b3 {
+        background-image: url("./img/flag.png");
+      }
       @for $i from 1 through 8 {
         > .c#{$i} {
           background-image: url(./img/#{$i}.png);
