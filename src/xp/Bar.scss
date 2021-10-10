@@ -15,6 +15,15 @@
     background-size: 20px 20px;
     box-sizing: content-box;
     background-image: url(./img/face_normal.png);
+    background-repeat: no-repeat;
+
+    &:active {
+      border: none;
+      width: 22px;
+      height: 22px;
+      border-top: 1px solid var(--cell-line);
+      border-left: 1px solid var(--cell-line);
+    }
 
     &.click {
       background-image: url(./img/face_click.png);

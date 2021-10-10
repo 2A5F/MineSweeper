@@ -1,15 +1,17 @@
 import './Bar.scss'
 
-export default function Bar({ onRestart }: { onRestart(): void }) {
+export type Face = 'normal' | 'click' | 'died' | 'win'
+
+export default function Bar({ onRestart, face }: { onRestart(): void, face: Face }) {
     return <div className='bar flex justify-between items-center'>
         <Num />
-        <Face onRestart={onRestart} />
+        <Face onRestart={onRestart} face={face} />
         <Num />
     </div>
 }
 
-function Face({ onRestart }: { onRestart(): void }) {
-    return <div className='face' onClick={onRestart}></div>
+function Face({ onRestart, face }: { onRestart(): void, face: Face }) {
+    return <div className={`face ${face}`} onClick={onRestart}></div>
 }
 
 function Num() {

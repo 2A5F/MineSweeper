@@ -1,25 +1,40 @@
 import './Board.scss'
 import { BoardProps } from '../common/Board'
-import Bar from './Bar'
+import Bar, { Face } from './Bar'
 import Cell from './Cell'
 import { rangeTo, rangeToEq, seq } from 'libsugar'
 import { useState } from 'react'
-import { useEventListener, useMount } from 'ahooks'
+import { useEventListener, useMount, useUpdate } from 'ahooks'
 import { GameCell } from '../Game'
 
 export default function Board({ size, grid, onRestart, onMsg }: BoardProps) {
     const [first, setFirst] = useState(true)
     useMount(() => setFirst(false))
 
+    const update = useUpdate()
+
     const [data] = useState(() => ({
         buttons: 0,
         cell: null as GameCell | null,
-        cell2dom: new Map<GameCell, HTMLDivElement>(),
-        dom2cell: new WeakMap<HTMLDivElement, GameCell>(),
+        cell2dom: new Map<GameCell, HTMLElement>(),
+        dom2cell: new WeakMap<HTMLElement, GameCell>(),
     }))
 
-    useEventListener('mouseup', e => {
-        console.log('up', e, e.buttons, data.buttons)
+    useEventListener('mousedown', e => {
+        data.buttons = e.buttons
+        update()
+        switch (data.buttons) {
+            case 3:
+            case 4:
+                const cell = data.dom2cell.get(e.target as HTMLElement) ?? null
+                if (cell != null) {
+                    data.cell = cell
+                    onMsg({ type: 'preview', pos: cell.pos, cell })
+                }
+                break;
+        }
+    })
+    useEventListener('mouseup', () => {
         const cell = data.cell
         if (cell != null) {
             switch (data.buttons) {
@@ -36,7 +51,22 @@ export default function Board({ size, grid, onRestart, onMsg }: BoardProps) {
             }
         }
         data.buttons = 0
+        update()
     })
+    useEventListener('mousemove', e => {
+        switch (data.buttons) {
+            case 3:
+            case 4:
+                const cell = data.dom2cell.get(e.target as HTMLElement) ?? null
+                if (cell != null) {
+                    data.cell = cell
+                    onMsg({ type: 'preview', pos: cell.pos, cell })
+                }
+                break;
+        }
+    })
+
+    const face = data.buttons != 0 ? 'click' : 'normal'
 
     return <div className={`board flex flex-col xp`}>
         {first ? <div className='preload'>
@@ -44,12 +74,10 @@ export default function Board({ size, grid, onRestart, onMsg }: BoardProps) {
             {seq(rangeToEq(9)).map(i => <div className={`n${i}`} key={i}></div>)}
         </div> : null}
 
-        <Bar onRestart={onRestart} />
+        <Bar onRestart={onRestart} face={face} />
         <div className="grid" style={{ gridTemplateColumns: `repeat(${size.width}, 1fr)`, gridTemplateRows: `repeat(${size.height}, 1fr)` }}
             onMouseDown={e => {
-                data.buttons = e.buttons
-                data.cell = data.dom2cell.get(e.target as HTMLDivElement) ?? null
-                console.log('down', e, data.cell)
+                data.cell = data.dom2cell.get(e.target as HTMLElement) ?? null
             }}
         >
             {grid.map(i => <Cell ref={dom => {

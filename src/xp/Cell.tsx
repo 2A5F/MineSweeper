@@ -9,7 +9,7 @@ export default forwardRef(function Cell({ cell }: {
     return <div
         ref={ref}
         className={`cell${clazs({
-            open: cell.open,
+            open: cell.open || cell.preview,
             bomb: cell.open && cell.hasBomb,
             flag: cell.hasFlag,
         }, cell.open && !cell.hasBomb && cell.num ? `n-${cell.num}` : null)}`}

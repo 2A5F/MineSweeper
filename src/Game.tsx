@@ -81,12 +81,16 @@ export class GameState {
                 }
                 break
             case 'round':
+                this.stopPreview()
                 if (this.playing) {
                     await this.openRound(msg.pos, msg.cell)
                 }
                 break
             case 'flag':
                 this.setFlag(msg.cell)
+                break
+            case 'preview':
+                this.preview(msg.pos, msg.cell)
                 break
         }
         this._lock = false
@@ -167,6 +171,34 @@ export class GameState {
         root.hasFlag = !root.hasFlag
         this.update()
     }
+
+    private _preview: GameCell[] = []
+    private preview(pos: Pos, root: GameCell) {
+        this.clearPreview()
+        this._preview.push(root)
+        root.preview = true
+        pos.forRound(this.size, p => {
+            const cell = this.grid[p.index(this.size)]
+            if (cell.hasFlag) return
+            cell.preview = true
+            this._preview.push(cell)
+        })
+        this.update()
+    }
+
+    private clearPreview() {
+        for (const cell of this._preview) {
+            cell.preview = false
+        }
+        this._preview.length = 0
+    }
+
+    private stopPreview() {
+        if (this._preview.length > 0) {
+            this.clearPreview()
+            this.update()
+        }
+    }
 }
 
 export const GameStateContext = createContext<GameState>(null!)
@@ -179,6 +211,8 @@ export class GameCell {
     hasBomb = false
     hasFlag = false
     open = false
+    preview = false
+    err = false
     num = 0
 }
 
@@ -186,5 +220,6 @@ export type GameMsg =
     | { type: 'open', pos: Pos, cell: GameCell }
     | { type: 'round', pos: Pos, cell: GameCell }
     | { type: 'flag', cell: GameCell }
+    | { type: 'preview', pos: Pos, cell: GameCell }
 
 export type GameMsgOf<M extends GameMsg['type']> = Extract<GameMsg, { type: M }>
