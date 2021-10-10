@@ -155,7 +155,6 @@ export class GameState {
                 used(pos.mapY(y => y + o).index(this.size), i => range(i - this.firstSafe, i + this.firstSafe))
             ])
         ]
-        console.log('start')
         for (const cell of seq(this.randge).filter(i => !seq(safeSpces).any(r => inRange(r, i))).take(this.bombs).map(i => this.grid[i])) {
             cell.hasBomb = true
         }
@@ -278,8 +277,6 @@ export class GameState {
     }
 
     private checkWin() {
-        console.log('checkWin', this.last, this.flags, this.bombs, this.size.size, this.opening, this.size.size - this.opening,
-            this.size.size - this.opening === this.bombs || this.flags === this.bombs && seq(this._flags).all(cell => cell.hasBomb))
         if (this.size.size - this.opening === this.bombs || this.flags === this.bombs && seq(this._flags).all(cell => cell.hasBomb)) {
             this.win()
             return true

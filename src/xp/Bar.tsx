@@ -54,7 +54,6 @@ function TimeNum({ startTime, endTime }: {
             const { startTime, endTime } = data
             if (startTime == null || endTime != null) return
             const now = new Date
-            console.log(now, startTime)
             const ntime = (now.getTime() - startTime.getTime()) / 1000
             if (ntime != time) setTime(ntime)
         }
