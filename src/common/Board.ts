@@ -1,10 +1,9 @@
-import { GameCell, GameMsgOf } from "../Gamex";
+import { GameCell, GameMsg } from "../Game";
 import { Size } from "../size";
 
 export interface BoardProps {
     size: Size
     grid: GameCell[]
     onRestart: () => void
-    onOpen: (msg: GameMsgOf<'open'>) => void
-    onFlag: (msg: GameMsgOf<'flag'>) => void
+    onMsg: (msg: GameMsg) => void
 }

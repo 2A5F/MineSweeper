@@ -1,7 +1,7 @@
 import { useUpdate } from 'ahooks'
 import { useState } from 'react'
 import './App.scss'
-import Game, { GameState, GameStateContext } from './Gamex'
+import Game, { GameState, GameStateContext } from './Game'
 
 export default function App() {
   const update = useUpdate()

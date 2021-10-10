@@ -1,14 +1,18 @@
 import './Cell.scss'
-import { GameCell } from '../Gamex';
+import { GameCell } from '../Game';
 import { clazs } from '../utils';
+import { ForwardedRef, forwardRef } from 'react';
 
-export default function Cell({ cell, onOpen, onFlag }: {
+export default forwardRef(function Cell({ cell }: {
     cell: GameCell
-    onOpen: React.MouseEventHandler<HTMLDivElement>
-    onFlag: React.MouseEventHandler<HTMLDivElement>
-}) {
-    return <div className={`cell${clazs({ open: cell.open, bomb: cell.open && cell.hasBomb, flag: cell.hasFlag }, cell.open && !cell.hasBomb && cell.num ? `n-${cell.num}` : null)}`} {...{ pos: cell.pos.str } as any}
-        onClick={onOpen}
-        onContextMenu={onFlag}
+}, ref: ForwardedRef<HTMLDivElement>) {
+    return <div
+        ref={ref}
+        className={`cell${clazs({
+            open: cell.open,
+            bomb: cell.open && cell.hasBomb,
+            flag: cell.hasFlag,
+        }, cell.open && !cell.hasBomb && cell.num ? `n-${cell.num}` : null)}`}
+        {...{ pos: cell.pos.str } as any}
     ></div>
-}
+})

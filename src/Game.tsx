@@ -20,14 +20,14 @@ export default function Game({ theme }: { theme: 'xp' }) {
     return <div className={`game grid place-self-center`}>
         <ThemeBoard size={game.size} grid={game.grid}
             onRestart={() => game.restart()}
-            onOpen={msg => game.send(msg)}
-            onFlag={msg => game.send(msg)}
+            onMsg={msg => game.send(msg)}
         />
     </div>
 }
 
 
 export class GameState {
+    private _lock = false
     private randge: Randge = null!
     private _playing = false
     public get playing() {
@@ -68,23 +68,34 @@ export class GameState {
         this.update()
     }
 
-    send(msg: GameMsg) {
-        if (msg.type === 'open') {
-            if (this.playing) {
-                this.openCell(msg.pos, msg.cell)
-            }
-            else {
-                this.start(msg.pos, msg.cell)
-            }
-        } else if (msg.type === 'flag') {
-            this.setFlag(msg.cell)
+    async send(msg: GameMsg) {
+        if (this._lock) return
+        this._lock = true
+        switch (msg.type) {
+            case 'open':
+                if (this.playing) {
+                    await this.openCell(msg.pos, msg.cell)
+                }
+                else {
+                    await this.start(msg.pos, msg.cell)
+                }
+                break
+            case 'round':
+                if (this.playing) {
+                    await this.openRound(msg.pos, msg.cell)
+                }
+                break
+            case 'flag':
+                this.setFlag(msg.cell)
+                break
         }
+        this._lock = false
     }
 
-    private start(pos: Pos, root: GameCell) {
+    private async start(pos: Pos, root: GameCell) {
         this._playing = true
         this.genBombs(pos)
-        this.openSpace(pos, root)
+        await this.openSpace(pos, root)
         this.update()
     }
 
@@ -135,8 +146,19 @@ export class GameState {
         if (root.open) return
         if (root.hasFlag) return
         if (root.hasBomb) return //todo
-        if (root.num == 0) return this.openSpace(pos, root)
+        if (root.num == 0) return await this.openSpace(pos, root)
         root.open = true
+        this.update()
+    }
+
+    private async openRound(pos: Pos, root: GameCell) {
+        if (!root.open) return
+        let flags = 0
+        pos.forRound(this.size, p => {
+            if (this.grid[p.index(this.size)].hasFlag) flags++
+        })
+        if (flags !== root.num) return
+        this.openSpace(pos, root)
         this.update()
     }
 
@@ -162,6 +184,7 @@ export class GameCell {
 
 export type GameMsg =
     | { type: 'open', pos: Pos, cell: GameCell }
+    | { type: 'round', pos: Pos, cell: GameCell }
     | { type: 'flag', cell: GameCell }
 
 export type GameMsgOf<M extends GameMsg['type']> = Extract<GameMsg, { type: M }>
