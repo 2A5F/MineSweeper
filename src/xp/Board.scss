@@ -25,6 +25,18 @@
           background-image: url("./img/number_#{$i}.png");
         }
       }
+      > .f1 {
+        background-image: url("./img/face_normal.png");
+      }
+      > .f2 {
+        background-image: url("./img/face_click.png");
+      }
+      > .f3 {
+        background-image: url("./img/face_cry.png");
+      }
+      > .f4 {
+        background-image: url("./img/face_sunglasses.png");
+      }
     }
   }
 }

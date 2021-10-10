@@ -70,8 +70,9 @@ export default function Board({ size, grid, onRestart, onMsg }: BoardProps) {
 
     return <div className={`board flex flex-col xp`}>
         {first ? <div className='preload'>
-            {seq(rangeTo(8)).map(i => <div className={`c${i + 1}`} key={i}></div>)}
-            {seq(rangeToEq(9)).map(i => <div className={`n${i}`} key={i}></div>)}
+            {seq(rangeTo(4)).map(i => <div className={`f${i + 1}`} key={`f${i + 1}`}></div>)}
+            {seq(rangeTo(8)).map(i => <div className={`c${i + 1}`} key={`c${i + 1}`}></div>)}
+            {seq(rangeToEq(9)).map(i => <div className={`n${i}`} key={`n${i}`}></div>)}
         </div> : null}
 
         <Bar onRestart={onRestart} face={face} />
