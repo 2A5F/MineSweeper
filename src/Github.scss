@@ -1,0 +1,18 @@
+#github {
+  position: absolute;
+  right: 15pt;
+  top: 15pt;
+  color: #24292f;
+  transition: color 0.25s, transform 0.25s, filter 0.25s;
+  z-index: 1000;
+
+  svg {
+    fill: currentColor;
+  }
+
+  &:hover {
+    color: #30363d;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 5pt rgba(36, 41, 47, 0.05));
+  }
+}
