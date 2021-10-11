@@ -9,7 +9,8 @@
   background-position: center center;
   background-size: 16px 16px;
 
-  &:not(.open) {
+  &:not(.open),
+  &.flag.preview {
     @include xp.xp-border-rev(2px);
 
     &.flag {
@@ -25,7 +26,7 @@
         background-color: rgb(255, 0, 0);
       }
     }
-    &.flag:not(.bomb) {
+    &.flag:not(.bomb):not(.preview) {
       background-image: url(./img/err.png);
     }
     @for $i from 1 through 8 {

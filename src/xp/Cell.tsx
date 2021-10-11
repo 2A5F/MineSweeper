@@ -11,6 +11,7 @@ export default forwardRef(function Cell({ cell, won, dead }: {
     return <div
         ref={ref}
         className={`cell${clazs({
+            preview: cell.preview,
             open: cell.open || cell.preview || cell.boom || (dead && ((!cell.hasBomb && cell.hasFlag) || (cell.hasBomb && !cell.hasFlag))),
             bomb: (cell.open || won || dead) && cell.hasBomb,
             flag: cell.hasFlag || (won && cell.hasBomb),

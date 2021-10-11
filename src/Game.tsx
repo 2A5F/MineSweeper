@@ -277,7 +277,7 @@ export class GameState {
     }
 
     private checkWin() {
-        if (this.size.size - this.opening === this.bombs || this.flags === this.bombs && seq(this._flags).all(cell => cell.hasBomb)) {
+        if (this.size.size - this.opening === this.bombs) {
             this.win()
             return true
         }
